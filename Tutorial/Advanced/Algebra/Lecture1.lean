@@ -192,20 +192,27 @@ theorem eq_inv_of_mul_eq_one_left {a x : G} : x * a = 1 → x = a⁻¹ := fun h 
 @[simp]
 theorem inv_one : (1 : G)⁻¹ = 1 := by
   apply inv_eq_of_mul_eq_one_left
-  sorry
-
+  
 @[simp]
 theorem inv_inv {a : G} : a⁻¹⁻¹ = a := by
-  sorry
+  apply mul_left_cancel a⁻¹
+  simp
 
 /-- 積の逆元は逆元をひっくり返した積。 -/
 @[simp]
 theorem mul_inv_rev {a b : G} : (a * b)⁻¹ = b⁻¹ * a⁻¹ := by
-  sorry
+  apply mul_right_cancel (a * b)
+  simp [mul_assoc]
 
 theorem mul_inv_eq_iff_eq_mul {a b c : G} : a * b⁻¹ = c ↔ a = c * b := by
   -- ヒント: `constructor`でゴールを分けよう
-  sorry
+  constructor
+  · intro h
+    apply mul_right_cancel b⁻¹
+    simp [h]
+  · intro h
+    apply mul_right_cancel b⁻¹
+    simp [h]
 
 theorem mul_inv_eq_one {a b : G} : a * b⁻¹ = 1 ↔ a = b := by
   sorry
