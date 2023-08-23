@@ -77,15 +77,19 @@ variable {C : Type u} [Category.{u, v} C] {a b c d e : C}
 
 example (f : Hom a b) (g : Hom b c) (h : Hom c d) (i : Hom d e) : 
     (f ≫ (𝟙 b ≫ g)) ≫ (h ≫ i) = f ≫ (g ≫ ((𝟙 c ≫ h) ≫ i)) := by
+  -- a  -f→  b  -g→  c  -h→  d  -i→  e
   -- ヒント: `simp`を使えば圏の公理を使って式が簡略化される
-  sorry
+  simp
 
 example (f : Hom a b) (g : Hom b a) (h₁ h₂ : Hom b c) (Hgf : g ≫ f = 𝟙 b) (Hfh : f ≫ h₁ = f ≫ h₂) : 
     h₁ = h₂ := by
   calc h₁ = 𝟙 b ≫ h₁ := by simp
     _ = (g ≫ f) ≫ h₁ := by rw [Hgf]
     -- 必要に応じて行を追加しよう
-    _ = h₂ := by sorry
+    _ = g ≫ (f ≫ h₁) := by simp
+    _ = g ≫ (f ≫ h₂) := by rw [Hfh]
+    _ = (g ≫ f) ≫ h₂ := by simp
+    _ = h₂ := by simp [Hgf]
 
 /- # 圏の例 -/
 
@@ -135,9 +139,9 @@ instance : Category CommRingCat where
   id R := RingHom.id R
   /- 以下の公理については証明を書いてもよいが、省略してもエラーがでないかどうかをまず確認してみよう。
   もしエラーが出なければ、それは`aesop`が成功したことを意味する。 -/
-  id_comp := sorry
-  comp_id := sorry
-  assoc := sorry
+  id_comp := by aesop
+  comp_id := by aesop
+  assoc := by aesop
 
 /- 次は可換環`R`に対して`R`上の可換代数の圏を定義する。-/
 
@@ -162,9 +166,9 @@ instance {R : CommRingCat} : Category (CommAlgCat R) where
   Hom A B := AlgHom R A B
   comp f g := AlgHom.comp g f
   id A := AlgHom.id R A
-  id_comp := sorry
-  comp_id := sorry
-  assoc := sorry
+  id_comp := by aesop
+  comp_id := by aesop
+  assoc := by aesop
 
 /- 定義の上の`@[simps]`はおまじないで、ここでは特に意味がない。`Lecture 2`で役に立つ。 -/
 
@@ -176,8 +180,8 @@ instance {A B : CommAlgCat R} : AlgHomClass (Hom A B) R A B :=
 これは対象の集合が空集合`Empty`であるような圏である。 -/
 -- ヒント: 空集合からの空写像は`Empty.elim`で表される
 instance : Category Empty where
-  Hom a b := sorry
+  Hom a b := Empty
   comp f g := sorry
-  id a := sorry
+  id a := Empty.elim a
 
 end Tutorial
