@@ -8,8 +8,12 @@
   "onCreateCommand": "lake exe cache get!",
 
   "customizations": {
-    "vscode" : {
-      "extensions" : [ "leanprover.lean4" ]
+    "vscode": {
+      "extensions": [
+        "leanprover.lean4",
+        "GitHub.copilot",
+        "mhutchie.git-graph"
+      ]
     }
   }
 }
