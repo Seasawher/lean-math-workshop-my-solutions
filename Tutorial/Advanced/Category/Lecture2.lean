@@ -1,5 +1,7 @@
 import Tutorial.Advanced.Category.Lecture1
 import Mathlib.RingTheory.TensorProduct
+import Mathlib.Tactic.Widget.CommDiag
+import ProofWidgets.Component.GoalTypePanel
 
 namespace Tutorial 
 
@@ -26,8 +28,8 @@ structure Initial (a : C) where
 
 /-- 始対象からの射がふたつ存在すれば、それらは等しい。 -/
 theorem Initial.uniq' {a : C} (h : Initial a) {b : C} (f g : Hom a b) : f = g :=
-  calc f = h.fromInitial b := by sorry
-       _ = g := by sorry
+    calc f = h.fromInitial b := by exact uniq h f
+        _ = g := by exact Eq.symm (uniq h g)
 
 end Category
 
@@ -40,12 +42,13 @@ example : Initial Empty where
   fromInitial X := by
     intro x
     -- ヒント: 空写像は`Empty.elim`で表される。`apply Empty.elim`を試してみよう。
-    sorry
+    apply Empty.elim
+    exact x
   uniq := by
     intro X f
     funext x
     -- ヒント: 空写像のコドメインは命題でもよい（空虚な真）
-    sorry
+    aesop 
     
 /-- 整数環`ℤ`は可換環の圏における始対象である。 -/
 /- 環とは底集合と環構造の組であった。底集合`ℤ`に対して、`inferInstance`がmathlibのどこかで定義されている
@@ -99,6 +102,8 @@ structure CoconeHom (s t : Cocone F) where
   /-- `hom`と余錐の射は可換 -/
   comm : ∀ j : J, s.toVertex j ≫ hom = t.toVertex j
 
+#print CoconeHom.comm
+
 -- おまじない。右画面の表示が少しきれいになる。
 attribute [pp_dot] Functor.obj Functor.map Cocone.toVertex CoconeHom.hom
 
@@ -107,16 +112,20 @@ instance : Category (Cocone F) where
   Hom s t := CoconeHom s t
   comp {r s t} (f : CoconeHom r s) (g : CoconeHom s t) := 
     { hom := f.hom ≫ g.hom
-      comm := by 
-        intro j
-        calc r.toVertex j ≫ f.hom ≫ g.hom 
-          _ = (r.toVertex j ≫ f.hom) ≫ g.hom := by sorry
-          _ = s.toVertex j ≫ g.hom := by sorry
-          _ = t.toVertex j := by sorry }
-  id t := 
-    { hom := 𝟙 t.vertex
       comm := by
-        sorry }
+        with_panel_widgets [ProofWidgets.GoalTypePanel]
+          intro j
+          calc r.toVertex j ≫ f.hom ≫ g.hom 
+            _ = (r.toVertex j ≫ f.hom) ≫ g.hom := by aesop
+            _ = s.toVertex j ≫ g.hom := by rw [f.comm j]
+            _ = t.toVertex j := by exact CoconeHom.comm g j }
+  id t := 
+    { 
+      hom := 𝟙 t.vertex
+      comm := by
+        intro j
+        simp
+    }
 
 /- これで余極限を定義する準備が整った。余極限は普遍性を持つ余錐であると述べたが、ここでいう普遍性とは
 始対象のことである。-/
@@ -183,7 +192,7 @@ def sumCocone (F : Functor Coproduct.Shape Type) : Cocone F where
   vertex := F.obj .l ⊕ F.obj .r
   toVertex j := match j with
     -- 「標準的な写像」を使おう
-    | .l => sorry
+    | .l => by sorry
     | .r => sorry
   naturality f := match f with
     | .id _ => by
