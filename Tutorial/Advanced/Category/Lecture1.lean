@@ -1,4 +1,6 @@
 import Mathlib.Algebra.Algebra.Hom
+import Mathlib.Tactic.Widget.CommDiag
+import ProofWidgets.Component.GoalTypePanel
 
 namespace Tutorial
 
@@ -79,7 +81,8 @@ example (f : Hom a b) (g : Hom b c) (h : Hom c d) (i : Hom d e) :
     (f ≫ (𝟙 b ≫ g)) ≫ (h ≫ i) = f ≫ (g ≫ ((𝟙 c ≫ h) ≫ i)) := by
   -- a  -f→  b  -g→  c  -h→  d  -i→  e
   -- ヒント: `simp`を使えば圏の公理を使って式が簡略化される
-  simp
+  with_panel_widgets [ProofWidgets.GoalTypePanel]
+    simp
 
 example (f : Hom a b) (g : Hom b a) (h₁ h₂ : Hom b c) (Hgf : g ≫ f = 𝟙 b) (Hfh : f ≫ h₁ = f ≫ h₂) : 
     h₁ = h₂ := by
@@ -181,7 +184,9 @@ instance {A B : CommAlgCat R} : AlgHomClass (Hom A B) R A B :=
 -- ヒント: 空集合からの空写像は`Empty.elim`で表される
 instance : Category Empty where
   Hom a b := Empty
-  comp f g := sorry
+  comp f g := by
+    rename_i α β γ
+    exact α
   id a := Empty.elim a
 
 end Tutorial
