@@ -215,10 +215,22 @@ theorem mul_inv_eq_iff_eq_mul {a b c : G} : a * b⁻¹ = c ↔ a = c * b := by
     simp [h]
 
 theorem mul_inv_eq_one {a b : G} : a * b⁻¹ = 1 ↔ a = b := by
-  sorry
+  constructor
+  · intro h
+    apply mul_right_cancel b⁻¹
+    simp [h]
+  · intro h
+    apply mul_right_cancel b⁻¹
+    simp [h]
 
 theorem inv_mul_eq_one {a b : G} : a⁻¹ * b = 1 ↔ a = b := by
-  sorry
+  constructor
+  · intro h
+    apply mul_left_cancel a⁻¹
+    simp [h]
+  · intro h
+    apply mul_left_cancel a⁻¹
+    simp [h]
 
 end Section1
 
@@ -280,7 +292,14 @@ theorem mul_mem {a b : G} : a ∈ H → b ∈ H → a * b ∈ H := H.mul_mem'
 theorem inv_mem {a : G} : a ∈ H → a⁻¹ ∈ H := H.inv_mem'
 
 theorem inv_mem_iff {a : G} : a⁻¹ ∈ H ↔ a ∈ H := by
-  sorry
+  have ha: a⁻¹⁻¹ = a := by
+    exact inv_inv
+  constructor
+  · intro h
+    rw [←ha]
+    exact inv_mem h    
+  · intro h
+    exact inv_mem h
 
 /-
 部分群が等しいとは`∈`が同値なとき。
@@ -299,11 +318,33 @@ def center (G) [Group G] : Subgroup G where
   carrier := { a : G | ∀ x : G, a * x = x * a}
   -- この部分集合が部分群の公理を満たすことを示そう。
   one_mem' := by
-    sorry
+    aesop
   mul_mem' := by
-    sorry
+    intro a b ha hb
+    simp
+    intro x
+
+    -- ∈ で書かれた仮定を分解する
+    dsimp at ha hb
+    have hax := ha x
+    have hbx := hb x
+
+    rw [
+      mul_assoc, 
+      hbx, 
+      ←mul_assoc, 
+      hax,
+      mul_assoc
+    ]
+
   inv_mem' := by
-    sorry
+    intro a ha x
+    apply mul_left_cancel a
+    simp
+    rw [←mul_assoc]
+    dsimp at ha
+    have ha := ha x
+    simp [ha]
 
 /-
 下の`centrizer`と`noramlizer`は少し面倒で難しいかもしれない。
@@ -314,15 +355,33 @@ variable (H)
 def Subgroup.centralizer : Subgroup G where
   carrier := { a : G | ∀ x ∈ H, a * x = x * a }
   one_mem' := by
-    sorry
+    aesop
   mul_mem' := by
     /- ヒント
     `ha : ∀ x, x ∈ H → a * x = x * a`と`hx : x ∈ H`があったら、
     `ha x hx`や`ha _ hx`で、`a * x = x * a`という等式が取り出せる。
     -/
-    sorry
+    intro a b ha hb
+    dsimp at ha hb
+    intro x hx
+    have ha := ha x hx
+    have hb := hb x hx
+    rw [
+      mul_assoc, 
+      hb,
+      ←mul_assoc,
+      ha,
+      mul_assoc
+    ]
   inv_mem' := by
-    sorry
+    -- 仮定を取り出す
+    intro a ha x hx
+    dsimp at ha
+    have ha := ha x hx
+
+    -- 結合法則と仮定を用いる
+    apply mul_left_cancel a
+    simp [←mul_assoc, ha]
 
 /- 役立つかもしれないヒント
 `x * y * z * a * b`を`x * (y * z) * a * b`に変えたいときは、
@@ -340,11 +399,37 @@ def Subgroup.centralizer : Subgroup G where
 def Subgroup.normalizer : Subgroup G where
   carrier := { a : G | ∀ x, x ∈ H ↔ a * x * a⁻¹ ∈ H }
   one_mem' := by
-    sorry
+    aesop
   mul_mem' := by
-    sorry
+    -- 仮定を取り出す
+    intro a b ha hb x
+    dsimp at ha hb
+
+    -- 重要な補題を示す
+    have hl : a * b * x * (a * b)⁻¹ = a * (b * x * b⁻¹) * a⁻¹ := by
+      apply mul_left_cancel a⁻¹
+      simp [mul_assoc]
+    rw [hl]
+
+    have hbx := hb x
+    rw [hbx]
+    have hax := ha (b * x * b⁻¹)
+    rw [hax]
+
   inv_mem' := by
-    sorry
+    intro a ha x
+    dsimp at ha
+
+    -- 補題を示す
+    have hl : a⁻¹⁻¹ = a := by
+      exact inv_inv
+    rw [hl]
+
+    -- 場合分けをせずに同値を示す
+    set y := a⁻¹ * x * a
+    have hay := ha y
+    rw [hay]
+    simp [mul_assoc]
 
 end Section2
 
