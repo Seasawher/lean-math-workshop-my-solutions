@@ -192,6 +192,7 @@ theorem eq_inv_of_mul_eq_one_left {a x : G} : x * a = 1 → x = a⁻¹ := fun h 
 @[simp]
 theorem inv_one : (1 : G)⁻¹ = 1 := by
   apply inv_eq_of_mul_eq_one_left
+  simp
   
 @[simp]
 theorem inv_inv {a : G} : a⁻¹⁻¹ = a := by
