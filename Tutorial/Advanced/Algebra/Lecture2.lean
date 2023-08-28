@@ -41,15 +41,22 @@ theorem map_mul {a b : G₁} : f (a * b) = f a * f b := f.map_mul' a b
 /-- 群準同型は単位元を保つ。 -/
 @[simp]
 theorem map_one : f 1 = 1 := by
-  have h : f 1 * f 1 = f 1 := by
-    sorry
-  sorry
+  have h := by
+    calc
+      f 1 * f 1 = f (1 * 1) := by simp [←map_mul]
+      _ = f 1 := by simp
+  set a := f 1
+  apply mul_left_cancel a
+  rw [h]
+  simp
 
 #check eq_inv_of_mul_eq_one_left -- これが使えるかも
 /-- 群準同型は逆元を保つ。 -/
 @[simp]
 theorem map_inv {a : G₁} : f (a⁻¹) = (f a)⁻¹ := by
-  sorry
+  apply eq_inv_of_mul_eq_one_left
+  rw [← map_mul]
+  simp
 
 /--
 2つの群準同型`f₁ : G₁ →* G₂`と`f₂ : G₂ →* G₃`の合成`f₂ ∘ f₁`も準同型。
@@ -59,19 +66,19 @@ def GroupHom.comp [Group G₁] [Group G₂] [Group G₃]
   toFun := f₂ ∘ f₁
   map_mul' := by
     -- ヒント: まずは`simp`を試そう
-    sorry
+    simp
 
 -- 恒等写像は準同型
 def GroupHom.id (G) [Group G] : G →* G where
   toFun := fun a ↦ a
   map_mul' := by
-    sorry
+    simp
 
 -- 全てを`1`に飛ばす写像は準同型
 def GroupHom.one : G₁ →* G₂ where
   toFun := fun _ ↦ 1
   map_mul' := by
-    sorry
+    simp
 
 end Section1
 
@@ -97,22 +104,38 @@ def range (f : G₁ →* G₂) : Subgroup G₂ where
     -- ヒント: とりあえず`simp`して考えよう
     -- `∃ a : A, P a`を示したかったら、
     -- 条件を満たす`a`を探して`exists a`しよう
-    sorry
+    simp
+    exists 1
+    simp
   mul_mem' := by
-    sorry
+    simp
+    intro a b x hx w hw
+    exists x * w
+    rw [map_mul]
+    rw [hx, hw]
   inv_mem' := by
-    sorry
+    intro a ha
+    simp at ha
+    obtain ⟨ y, hy ⟩ := ha
+    simp
+    exists y⁻¹
+    rw [map_inv, hy]
 
 /-- 群準同型`f : G₁ →* G₂`の核（`G₁`の部分群）。`f.ker`でアクセス可能。 -/
 def ker (f : G₁ →* G₂) : Subgroup G₁ where
   carrier := { a : G₁ | f a = 1 } -- このような直感的な記法が使える
   -- 部分群の公理を満たすことを示そう。
   one_mem' := by
-    sorry
+    simp
   mul_mem' := by
-    sorry
+    simp
+    intro a b ha hb
+    rw [ha, hb]
+    simp
   inv_mem' := by
-    sorry
+    simp
+    intro a ha
+    simp [ha]
 
 /-- 核に入ることと飛ばして`1`に行くことは同値。 -/
 @[simp]
@@ -136,11 +159,11 @@ instance : Top (Subgroup G) where
   top := {
     carrier := Set.univ -- これは`G`を`G`の部分集合とみなしたもの
     one_mem' := by
-      sorry
+      aesop
     mul_mem' := by
-      sorry
+      aesop
     inv_mem' := by
-      sorry
+      aesop
   }
 
 -- これは以下のように使える。`⊤`は`\top`で入力し、これはこの部分群が
@@ -152,11 +175,11 @@ instance : Bot (Subgroup G) where
   bot := {
     carrier := { 1 } -- `1`のみからなる一元集合
     one_mem' := by
-      sorry
+      simp
     mul_mem' := by
-      sorry
+      simp
     inv_mem' := by
-      sorry
+      simp
   }
 
 /-- 自明部分群`⊥`に属することと`1`なことは同値。 -/
@@ -174,9 +197,20 @@ variable {f : G₁ →* G₂}
 #check mul_inv_eq_one -- これが役立つかも
 theorem injective_iff_map_eq_one : Function.Injective f ↔ (∀ a, f a = 1 → a = 1) := by
   constructor
-  · sorry
-  · sorry 
-
+  · intro finj
+    intro a ha
+    apply finj
+    simp [ha]
+  · intro ha
+    intro a x h
+    apply mul_right_cancel x⁻¹
+    simp
+    apply ha
+    calc
+      f (a * x⁻¹) = f a * f x⁻¹ := by simp
+      _ = f a * (f x)⁻¹ := by simp
+      _ = 1 := by simp [h]
+    
 namespace GroupHom
 
 /-- 群準同型の核が自明なことと単射なことは同値。 -/
