@@ -234,7 +234,17 @@ def leftQuotientStabilizerIsoSelfOfIsTransitive
     -- 今`X`は推移的という仮定があるので、`x y : X`に対して、
     -- `∃ a : G, a • x = y`という形の主張は、
     -- `apply IsTransitive.exists_smul_eq`で示すことができる。
-   sorry
+   
+    -- 任意の x ∈ X に対して，G ⧸ stabilizer G x₀ → X によって写ってくる元があることを言いたい
+    intro x
+
+    -- 仮定により `X` に `G` は推移的に作用しているので，`a • x₀ = x` となる `a ∈ G` が存在する
+    have h : ∃ a : G, a • x₀ = x := IsTransitive.exists_smul_eq x₀ x
+    obtain ⟨a, ha⟩ := h
+
+    -- この `a` に対して `a ⋆ stabilizer G x₀` が `x` に写ることを示す
+    use a ⋆ stabilizer G x₀
+    simp [ha]
 
 end GroupAction
 
