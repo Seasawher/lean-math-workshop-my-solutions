@@ -32,13 +32,19 @@ def leftRel {G} [Group G] (H : Subgroup G) : Setoid G where
   r a b := a⁻¹ * b ∈ H
   iseqv := { -- `r`が同値関係なことを示す。
     refl := by -- 反射律
-      sorry
+      aesop
     symm := by -- 対称律
       -- ヒント: `H.inv_mem_iff`が使えるかも。
-      sorry
+      intro x y h
+      rw [← H.inv_mem_iff]
+      simp_all
     trans := by -- 推移律
       -- ヒント: `H.mul_mem`が使えるかも。
-      sorry
+      intro x y z
+      intro h1 h2
+      have hp := H.mul_mem h1 h2
+      simp [mul_assoc] at hp
+      apply hp
   }
 
 /-- 群`G`とその部分群`H`について、左剰余類のなす集合、
@@ -104,20 +110,25 @@ instance : GroupAction G (G ⧸ H) where
   それが`G ⧸ H`上でwell-definedなことの証明を与える。
   -/
   smul := fun a ↦ lift (fun x ↦ (a * x) ⋆ H) <| by
-    sorry
+    intro b c h
+    simp [mul_assoc]
+    apply h
   one_smul' := by
     /- これは「任意の`G ⧸ H`の元について◯◯」という形をしている。
     普通に`intro`すると`G ⧸ H`の元を取ることになり面倒だが、
     `rintro ⟨a⟩`とすると、`G`の元`a : G`についての主張に書き換わる。
     -/
-    sorry
+    rintro ⟨ a ⟩
+    simp
   mul_smul' := by
     /- ヒント: 上のように`rintro`を適切に使うとよい。
     また、ゴールが定義上`? ⋆ H = ? ⋆ H`という形と同じときは、
     `change _ ⋆ H = _ ⋆ H`とすればゴールが変わる。
     （他にもいろんなやり方があるだろう。）
     -/
-    sorry
+    intro b c
+    rintro ⟨ x ⟩
+    simp [mul_assoc]
 
 -- `G ⧸ H`上での`G`作用の定義の確認
 @[simp]
@@ -156,7 +167,10 @@ instance {H : Subgroup G} : IsTransitive G (G ⧸ H) where
   exists_smul_eq := by
     -- 任意の`G ⧸ H`の元2つについて◯◯、という主張なので、
     -- `rintro ⟨a⟩ ⟨b⟩`により2つ`G`の元をとってこれる。
-    sorry
+    rintro ⟨ x ⟩ ⟨ y ⟩ 
+    simp
+    exists y * x⁻¹
+    simp_all
 
 -- 逆に全ての空でない推移的`G`集合はこの形なことを見ていこう。
 
@@ -168,11 +182,18 @@ def stabilizer (G) [Group G] {X} [GroupAction G X] (x : X) : Subgroup G where
   carrier := { a : G | a • x = x }
   -- 部分群の公理を満たすことを示そう。
   one_mem' := by
-    sorry
+    aesop
   mul_mem' := by
-    sorry
+    intro a b
+    intro ha hb
+    simp_all
+    simp [mul_smul]
   inv_mem' := by
-    sorry
+    intro a ha
+    simp_all
+    rw [← ha]
+    simp
+    rw [ha]
 
 -- 以下`X`を`G`集合とする。
 variable [GroupAction G X]
@@ -189,17 +210,34 @@ def leftQuotientStabilizerIsoSelfOfIsTransitive
   -- `G → X, a ↦ a • x₀`を`G ⧸ stabilizer G x₀`上の写像にリフトさせよう。
   toFun := LeftQuotient.lift (fun a ↦ a • x₀) <| by
     -- 写像がwell-definedなことを示す必要がある。
-    sorry
+    intro a b
+    intro h
+    simp_all
+    conv =>
+      lhs
+      rw [← h]
+    simp [mul_smul]
   map_smul' := by -- 上の写像が`G`同変なこと。
     -- 「`G ⧸ H`の元について◯◯」がゴールなら、
     -- `rintro ⟨a⟩`とすれば`a : G`についての主張に書き換わる。
-    sorry
+    intro a
+    rintro ⟨ x ⟩ 
+    simp [mul_smul]
   injective := by -- 単射性
-    sorry
+    simp
+    rw [Function.Injective]
+    rintro ⟨ a ⟩ ⟨ b ⟩
+    simp
+    intro h
+    simp [mul_smul, ← h]
   surjective := by -- 全射性
     -- 今`X`は推移的という仮定があるので、`x y : X`に対して、
     -- `∃ a : G, a • x = y`という形の主張は、
     -- `apply IsTransitive.exists_smul_eq`で示すことができる。
+
+    rw [Function.Surjective]
+    intro b
+    simp
     sorry
 
 end GroupAction
