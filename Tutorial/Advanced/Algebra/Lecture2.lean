@@ -249,9 +249,9 @@ theorem range_eq_top : f.range = ⊤ ↔ Function.Surjective f := by
     -- `ext a`を使うと、元を取って比較できる。
     ext a
     constructor
-    · intro h
+    · intro _
       simp
-    · intro h
+    · intro _
       simp
       exact hsurj a
 
