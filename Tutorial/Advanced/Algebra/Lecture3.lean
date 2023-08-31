@@ -51,15 +51,22 @@ theorem smul_smul (a b : G) (x : X) : a • b • x = (a * b) • x := (mul_smul
 -- いくつかの`simp`を追加
 @[simp]
 theorem inv_smul_smul {a : G} {x : X} : a⁻¹ • a • x = x := by
-  sorry
+  rw [← mul_smul]
+  simp
 
 @[simp]
 theorem smul_inv_smul {a : G} {x : X} : a • a⁻¹ • x = x := by
-  sorry
+  rw [← mul_smul]
+  simp
 
 /-- `G`集合に対して左から`a : G`を当てる写像は単射。 -/
 theorem GroupAction.injective (a : G) : Function.Injective fun (x : X) ↦ a • x := by
-  sorry
+  rw [Function.Injective]
+  intro x y h
+  calc
+    x = a⁻¹ • a • x := by rw [inv_smul_smul]
+    _ = a⁻¹ • a • y := by rw [h]
+    _ = y := by simp
 
 -- 上の言い換え、きっといつか使うときに便利。
 /-- `G`集合に対して、`a : G`を当てて等しいならもともと等しい。 -/
@@ -68,28 +75,34 @@ theorem smul_cancel (a : G) {x y : X} (h : a • x = a • y) : x = y :=
 
 /-- 左から`a : G`を当てる写像は全射。 -/
 theorem GroupAction.surjective (a : G) : Function.Surjective fun (x : X) ↦ a • x := by
-  sorry
+  rw [Function.Surjective]
+  intro x
+  exists a⁻¹ • x
+  simp  
 
 -- もっと強く、`a • (-)`という写像は自然な逆写像を持つ`X`から`X`への全単射である。
 -- `X`から`X`への全単射とその逆写像の組の集合は`X ≃ X`と表す。
 def GroupAction.toPerm : G → (X ≃ X) := fun (a : G) ↦ {
   toFun := fun x ↦ a • x
   -- この写像の逆写像は何であろうか？
-  invFun := sorry
+  invFun := fun x ↦ a⁻¹ • x  
   -- これらが互いに逆写像なことを示す必要がある。
   left_inv := by
-    sorry
+    rw [Function.LeftInverse]
+    simp
   right_inv := by
-    sorry
+    rw [Function.RightInverse]
+    rw [Function.LeftInverse]
+    simp
 }
 
 -- 群`G`自体も左から元を当てることで、自然に左`G`集合になる。
 instance : GroupAction G G where
   smul := fun a x ↦ a * x
   one_smul' := by
-    sorry
+    aesop
   mul_smul' := by
-    sorry
+    simp [mul_assoc]
 
 /-- `G`集合`G`での`•`の定義の確認。 -/
 @[simp]
@@ -141,7 +154,8 @@ theorem map_smul (f : X →[G] Y) : ∀ (a : G) (x : X), f (a • x) = a • f x
 def GroupActionHom.comp (f₁ : X →[G] Y) (f₂ : Y →[G] Z) : X →[G] Z where
   toFun := f₂ ∘ f₁
   map_smul' := by
-    sorry
+    intro a x
+    simp [map_smul]
 
 -- ついでに`G`集合の同型も定義しよう。
 
@@ -165,7 +179,16 @@ def GroupActionHom.inverse (f : X →[G] Y)
     もしくは、`rw [Function.LeftInverse] at h₁`で定義を確認して、
     それを利用して直接`calc`で等式を示すこともできる。
     -/
-    sorry
+    intro a y
+    have hsurj := h₂.surjective
+    rw [Function.Surjective] at hsurj
+    obtain ⟨ x, hsurj' ⟩ := hsurj y
+    rw [← hsurj']
+    rw [Function.LeftInverse] at h₁
+    calc
+      g ( a • f x ) = g ( f ( a • x)) := by simp [map_smul]
+      _ = a • x := by simp [h₁]
+      _ = a • ( g ( f x) ) := by simp [h₁]
 
 /-
 最後に、`G`集合`X`について、`G`自身から`X`への同変写像の集合は、
@@ -181,7 +204,11 @@ def yoneda : (G →[G] X) ≃ X where
   invFun := fun x ↦ {
     toFun := fun a ↦ a • x
     map_smul' := by -- `G`同変なことを示す必要がある。
-      sorry
+      -- 行先の写像を φ とする．これが同変写像であることを示す 
+      set φ : G → X := fun a ↦ a • x
+
+      intro b y
+      simp [mul_smul]
   }
   -- これらが互いに逆写像なこと。
   left_inv := by
@@ -191,9 +218,14 @@ def yoneda : (G →[G] X) ≃ X where
     またゴールが定義上「`c = d`」に等しいときは、
     `change c = d`でゴールをその形に変えられる。
     -/
-    sorry
+    rw [Function.LeftInverse]
+    intro φ
+    ext p
+    simp [← map_smul]
   right_inv := by
-    sorry
+    rw [Function.RightInverse, Function.LeftInverse]
+    intro x
+    simp
 
 end Section2
 
@@ -214,11 +246,23 @@ def orbitRel (G) [Group G] (X) [GroupAction G X] : Setoid X where
   r x y := ∃ a : G, a • x = y
   iseqv := { -- この`r`が同値関係なこと。
     refl := by -- 反射律
-      sorry
+      intro x
+      exists 1
+      simp
     symm := by -- 対称律
-      sorry
+      intro x y
+      intro ha
+      obtain ⟨ a, ha ⟩ := ha
+      exists a⁻¹
+      simp [← ha]
     trans := by -- 推移律
-      sorry
+      intro x y z
+      intro hy hz
+      obtain ⟨ a, hy ⟩ := hy
+      obtain ⟨ b, hz ⟩ := hz
+      exists b * a
+      simp [← hz, ← hy]
+      rw [mul_smul]
   }
 
 -- 一方で`x : X`の軌道というものも考えられる。
@@ -229,7 +273,25 @@ variable [Group G] [GroupAction G X]
 
 /-- 軌道が等しいことと、片方が軌道に含まれることは同値。 -/
 theorem orbit_eq_orbit_iff_mem_orbit {x y : X} : orbit G x = orbit G y ↔ y ∈ orbit G x := by
-  sorry
+  constructor
+  · intro h
+    rw [h]
+    dsimp [orbit]
+    exists 1
+    simp
+  · intro h
+    ext z
+    dsimp [orbit] at *
+    obtain ⟨ a, h ⟩ := h
+    constructor
+    · intro hz
+      obtain ⟨ c, hz ⟩ := hz
+      exists c * a⁻¹
+      simp [← hz, ← h, mul_smul]
+    · intro hz
+      obtain ⟨ c, hz ⟩ := hz
+      exists c * a
+      simp [← hz, ← h, mul_smul]
 
 end Appendix
 
