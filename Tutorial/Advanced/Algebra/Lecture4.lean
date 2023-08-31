@@ -188,6 +188,7 @@ def stabilizer (G) [Group G] {X} [GroupAction G X] (x : X) : Subgroup G where
     intro ha hb
     simp_all
     simp [mul_smul]
+    rw [hb, ha]
   inv_mem' := by
     intro a ha
     simp_all
