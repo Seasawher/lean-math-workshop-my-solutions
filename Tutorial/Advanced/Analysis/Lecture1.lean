@@ -86,10 +86,11 @@ example (a : ℝ) : HasDerivAt (fun x ↦ x ^ 2) (2 * a) a := by
     _ =o[𝓝 0] fun h ↦ h                     := ?eq2
   case eq1 =>
     -- ヒント: 関数の間の等号を示したいときは`funext`を使おう
-    sorry
+    funext x
+    ring
   case eq2 =>
     -- ヒント: `apply?`を使って必要な命題を探せる。2行以内で証明できるはず。
-    sorry
+    apply isLittleO_pow_id (by linarith)
 
 -- 4つめの定義を使っても示すことができるが、ゼロ除算の扱いに注意する必要がある。
 example (a : ℝ) : HasDerivAt (fun x ↦ x ^ 2) (2 * a) a := by
@@ -137,11 +138,11 @@ end Landau
 theorem hasDerivAt_const (c : ℝ) : HasDerivAt (fun _ ↦ c) 0 a := by
   rw [hasDerivAt_iff_isLittleO]
   -- ヒント: `simp`を使おう
-  sorry 
+  simp
 
 theorem hasDerivAt_id (a : ℝ) : HasDerivAt id 1 a := by
   rw [hasDerivAt_iff_isLittleO]
-  sorry
+  simp
 
 theorem HasDerivAt.add (hf : HasDerivAt f f' a) (hg : HasDerivAt g g' a) :
     HasDerivAt (fun x ↦ f x + g x) (f' + g') a := by
@@ -151,16 +152,22 @@ theorem HasDerivAt.add (hf : HasDerivAt f f' a) (hg : HasDerivAt g g' a) :
     _ =o[𝓝 a] fun x ↦ x - a                                            := ?eq2
   case eq1 =>
     -- ヒント: 関数の間の等号を示したいときは`funext`を使おう
-    sorry
+    funext x
+    ring
   case eq2 =>
     -- ヒント: `apply?`を使って必要な命題を探せる
-    sorry
+    exact IsLittleO.add hf hg
+
 
 theorem HasDerivAt.const_mul (c : ℝ) (hf : HasDerivAt f f' a) :
     HasDerivAt (fun x ↦ c * f x) (c * f') a := by
   rw [hasDerivAt_iff_isLittleO] at *
   -- ヒント: `HasDerivAt.add`のときと同様に`calc`で計算できる
-  sorry
+  calc (fun x ↦ c * f x - c * f a - (x - a) * (c * f'))
+    _ = (fun x ↦ c * (f x - f a - (x - a) * f')) := by funext x; ring
+    _ =o[𝓝 a] fun x ↦ x - a                     := ?eq
+  case eq =>
+    exact IsLittleO.const_mul_left hf c
 
 -- Lecture 2で用いる
 theorem HasDerivAt.neg (hf : HasDerivAt f f' a) : 
@@ -188,10 +195,11 @@ theorem HasDerivAt.isBigO_sub (h : HasDerivAt f f' a) :
     _ =O[𝓝 a] fun x ↦ x - a  := ?eq2
   case eq1 =>
     -- ヒント: 関数の間の等号を示したいときは`funext`を使おう
-    sorry
+    funext x
+    ring
   case eq2 =>
     -- ヒント: `apply?`を使って必要な命題を探せる
-    sorry
+    exact isBigO_const_mul_self f' fun x ↦ x - a
 
 /-- 微分可能ならば連続 -/
 theorem HasDerivAt.continuousAt (h : HasDerivAt f f' a) : 
