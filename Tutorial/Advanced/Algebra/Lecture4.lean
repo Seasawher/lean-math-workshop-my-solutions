@@ -234,11 +234,7 @@ def leftQuotientStabilizerIsoSelfOfIsTransitive
     -- 今`X`は推移的という仮定があるので、`x y : X`に対して、
     -- `∃ a : G, a • x = y`という形の主張は、
     -- `apply IsTransitive.exists_smul_eq`で示すことができる。
-
-    rw [Function.Surjective]
-    intro b
-    simp
-    sorry
+   sorry
 
 end GroupAction
 
