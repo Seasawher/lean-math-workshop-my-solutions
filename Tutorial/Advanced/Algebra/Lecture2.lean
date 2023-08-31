@@ -213,23 +213,47 @@ theorem injective_iff_map_eq_one : Function.Injective f ↔ (∀ a, f a = 1 → 
     
 namespace GroupHom
 
+#check mem_bot
+
 /-- 群準同型の核が自明なことと単射なことは同値。 -/
 theorem ker_eq_bot : f.ker = ⊥ ↔ Function.Injective f := by
   -- 上の`injective_iff_map_eq_one`で`rw`してから`constructor`がよい。
   -- （上を使わず直接示すこともできる）
-  sorry
+  rw [injective_iff_map_eq_one]
+  constructor
+  · intro hf a ha
+    rw [← mem_ker] at ha
+    rw [hf] at ha
+    exact ha
+  · intro h
+    ext a
+    constructor
+    · intro hf
+      simp
+      have := h a
+      apply this
+      simp_all
+    · intro ha
+      simp_all
 
 /-- 群準同型の像が全体なことと全射なことは同値。 -/
 theorem range_eq_top : f.range = ⊤ ↔ Function.Surjective f := by
   constructor
   · intro hrange y
     have hy : y ∈ (⊤ : Subgroup G₂) := by
-      sorry
-    sorry
+      simp
+    rw [← hrange] at hy
+    exact hy
   · intro hsurj
     -- ヒント: 2つの部分群が等しいことを示したいので、
     -- `ext a`を使うと、元を取って比較できる。
-    sorry
+    ext a
+    constructor
+    · intro h
+      simp
+    · intro h
+      simp
+      exact hsurj a
 
 end GroupHom
 
@@ -276,19 +300,25 @@ def homToPerm : G →* Perm G where
     -- `G → G, x ↦ a * x`に対応する`Perm G`の元を構成する
     toFun := fun x ↦ a * x
     -- この写像の逆写像は何であろうか。
-    invFun := sorry
+    invFun := fun x ↦ a⁻¹ * x  
     -- これらが互いに逆写像なことを示していく。
     left_inv := by
       rw [Function.LeftInverse]
-      sorry
+      intro x
+      simp
     right_inv := by
-      sorry
+      rw [Function.RightInverse]
+      rw [Function.LeftInverse]
+      simp
   }
   map_mul' := by
     -- 上の写像が積を保つことの証明
     -- ヒント: ゴールが`f g : Perm G`について`f = g`なら、
     -- `ext x`とすると、`f x = g x`を示すことの帰着される。
-    sorry
+    intro a b
+    ext x
+    simp
+    rw [mul_assoc]
 
 #check homToPerm G -- `homToPerm G`で群準同型`G →* Perm G`を表す
 
@@ -302,9 +332,9 @@ theorem homToPerm_injective : Function.Injective (homToPerm G) := by
     _ = (homToPerm G a) 1 := by
       -- 冷静に考えるとこれは`homToPerm`の定義。
       -- 定義から両辺が等しいときは`rfl` tacticが使える。
-      sorry
+      rfl
     _ = 1 := by
-      sorry
+      aesop
 
 -- 以上により任意の群`G`に対して、単射準同型`G →* Perm G`が構成できた！
 
