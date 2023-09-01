@@ -224,7 +224,8 @@ namespace GroupHom
 def rangeRestrict : G →* f.range where
   toFun := fun a ↦ ⟨f a, by simp⟩
   map_mul' := by
-    sorry
+    intro a b
+    simp
 
 /-- `rangeRestrict`の定義の確認。 -/
 @[simp]
@@ -233,7 +234,8 @@ theorem rangeRestrict_apply {a : G} : f.rangeRestrict a = f a := rfl
 /-- `f : G →* H`から誘導される`G ⧸ f.ker →* f.range`。つまり準同型定理で同型であることが主張される準同型。 -/
 def rangeKerLift : G ⧸ f.ker →* f.range :=
   f.rangeRestrict.kerLift <| by
-    sorry
+    intro a hker ; simp
+    aesop
 
 /-- `rangeKerLift`の定義の確認。 -/
 @[simp]
@@ -242,13 +244,18 @@ theorem rangeKerLift_apply {a : G} : f.rangeKerLift (a ⋆ f.ker) = f a := rfl
 #check injective_iff_map_eq_one -- これが便利かも
 /-- `f.rangeKerLift`は単射である。 -/
 theorem rangeKerLift_injective : Function.Injective f.rangeKerLift := by
-  sorry
+  rw [injective_iff_map_eq_one]
+  rintro ⟨a⟩ ; simp
+  intro h
+  aesop
 
 /-- `f.rangeKerLift`は全射である。 -/
 theorem rangeKerLift_surjective : Function.Surjective f.rangeKerLift := by
   -- `f.range.Elem`から元を取るとき、下のようにすると`y : H`が取れ、わかりやすい
   intro ⟨y, hy⟩
-  sorry
+  have ⟨ x, hx ⟩ := hy
+  simp
+  exists x ⋆ ker f
 
 /-- 群の準同型定理。`G ⧸ f.ker`と`f.range`の間に自然な群同型が誘導される。 -/
 -- 全て必要なことは示したので、やることはない。
