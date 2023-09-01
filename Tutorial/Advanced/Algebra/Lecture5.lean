@@ -113,6 +113,9 @@ theorem mem_of_eq_one {a : G} : a ⋆ N = (1 : G ⧸ N) ↔ a ∈ N := by
 
     apply Subgroup.inv_mem
     assumption
+  · intro h
+    apply Subgroup.inv_mem
+    assumption
 
 variable [Group G] {N : Subgroup G} [N.Normal] [Group H] 
 
