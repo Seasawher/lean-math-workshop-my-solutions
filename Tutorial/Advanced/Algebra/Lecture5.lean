@@ -32,10 +32,9 @@ theorem mem_comm {a b} : a * b ∈ N → b * a ∈ N := by
   intro hab
   -- 一度紙で計算してみて、下のように`calc`するとよいかも。
   calc
-    b * a = sorry := by sorry
-    _ = sorry := by sorry
-    _ ∈ N := by
-      sorry
+    b * a = b * a * (b * b⁻¹) := by simp 
+    _ = b * (a * b) * b⁻¹ := by simp [mul_assoc]
+    _ ∈ N := by apply Normal.conj_mem ; assumption
 
 theorem mem_comm_iff (a b : G) : a * b ∈ N ↔ b * a ∈ N := ⟨mem_comm, mem_comm⟩
 
@@ -49,25 +48,55 @@ instance : Group (G ⧸ N) where
   mul := Quotient.map₂' (fun a b ↦ a * b) <| by
     -- 積が剰余類上でwell-definedか？
     -- `mem_comm`や`mem_comm_iff`が役立つかも。
-    sorry
+    intro a b hab x y hxy
+    
+    -- goal と仮定にある，`G ⧸ N` 上で同じという条件を展開する
+    simp_all
+
+    -- 式変形をする
+    calc
+      x⁻¹ * a⁻¹ * (b * y) =  x⁻¹ * (a⁻¹ * b) * y := by simp [mul_assoc]
+      _ = (x⁻¹ * (a⁻¹ * b) * x) * (x⁻¹ * y) := by simp [mul_assoc]
+    
+    apply N.mul_mem'
+    · -- x⁻¹ * (a⁻¹ * b) * x ∈ N を示す
+      -- x を x⁻¹⁻¹ で書き換える
+      have hx : x = x⁻¹⁻¹ := by simp
+      conv =>
+        pattern (_ * _) * x
+        arg 2
+        rw [hx]
+      
+      -- 正規部分群の定義から N の元だとわかる
+      apply Subgroup.Normal.conj_mem ; assumption
+    · -- x⁻¹ * y ∈ N を示す
+      apply hxy
+
   one := 1 ⋆ N
   -- 逆元を取る操作は、`a ↦ a⁻¹ ⋆ N`をliftしよう。
   inv := LeftQuotient.lift (fun a ↦ a⁻¹ ⋆ N) <| by
     -- well-defined性
-    sorry
+    intro a b hab
+    simp
+    
+    -- 正規部分群の性質を使う
+    rw [Subgroup.mem_comm_iff]
+    
+    have : b⁻¹ * a = (a⁻¹ * b)⁻¹ := by simp
+    rw [this]
+    apply Subgroup.inv_mem ; assumption
+
   mul_assoc := by
     -- 結合性。まず代表元を取る。
     rintro ⟨a⟩ ⟨b⟩ ⟨c⟩
     -- 次のように`change`でゴールを見やすくするとよい
     change (a * b * c) ⋆ N = (a * (b * c)) ⋆ N
     -- もしくは`change`のかわりに、`simp`や`dsimp`を使ってもよい
-    sorry
+    simp [mul_assoc]
   one_mul := by
-    rintro ⟨a⟩
-    sorry
+    rintro ⟨a⟩ ; simp
   mul_inv_left := by
-    sorry
-
+    rintro ⟨ a ⟩ ; simp
 @[simp]
 theorem QuotientGroup.mul_eq (a b : G) : (a ⋆ N) * (b ⋆ N) = (a * b) ⋆ N := rfl
 
@@ -76,7 +105,14 @@ theorem one : (1 : G ⧸ N) = 1 ⋆ N := rfl
 
 @[simp]
 theorem mem_of_eq_one {a : G} : a ⋆ N = (1 : G ⧸ N) ↔ a ∈ N := by
-  sorry
+  simp
+  constructor
+  · intro h
+    have : a = a⁻¹⁻¹ := by simp
+    rw [this]
+
+    apply Subgroup.inv_mem
+    assumption
 
 variable [Group G] {N : Subgroup G} [N.Normal] [Group H] 
 
@@ -84,11 +120,18 @@ variable [Group G] {N : Subgroup G} [N.Normal] [Group H]
 いわゆる商群の普遍性。 -/
 def GroupHom.kerLift (f : G →* H) (h : ∀ a ∈ N, f a = 1) : (G ⧸ N) →* H where
   toFun := LeftQuotient.lift f <| by
-    sorry
+    -- well-define であることを示す
+    intro a b hab
+
+    have h1 := h (a⁻¹ * b) hab
+    calc
+      f a = f a * 1 := by simp
+      _ = f a * f (a⁻¹ * b) := by rw [←h1]
+      _ = f b := by simp
   map_mul' := by
     -- `rintro ⟨a⟩`等で代表元をとると良い。
-    sorry
-
+    rintro ⟨a⟩ ⟨b⟩
+    simp
 end Section1
 
 
@@ -108,7 +151,8 @@ infixr:25 " ≅* " => GroupIso
 /-- 群準同型の核は正規部分群である。 -/
 instance : f.ker.Normal where
   conj_mem := by
-    sorry
+    intro a x hker
+    simp_all
 
 /-
 さて、以下では`f : G →* H`について、`G ⧸ f.ker ≅* f.range`を示したい。
