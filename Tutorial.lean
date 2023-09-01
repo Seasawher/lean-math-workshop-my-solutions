@@ -7,6 +7,7 @@ import Tutorial.Advanced.Algebra.Lecture1
 import Tutorial.Advanced.Algebra.Lecture2
 import Tutorial.Advanced.Algebra.Lecture3
 import Tutorial.Advanced.Algebra.Lecture4
+import Tutorial.Advanced.Algebra.Lecture5
 import Tutorial.Advanced.Analysis.Lecture1
 import Tutorial.Advanced.Analysis.Lecture2
 import Tutorial.Advanced.Analysis.Lecture3
