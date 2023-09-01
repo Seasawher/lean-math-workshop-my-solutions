@@ -45,9 +45,9 @@ theorem Injective.comp {f : X → Y} {g : Y → Z} (hfinj : Injective f) (hginj 
 
 /-
 *補足*
-`hfinj : Injective f`は、「`f x₁ = f x₂`という事実が与えられたら、`x₁ = x₂`という事実を返す関数」と思える。
+`hfinj : Injective f`は、「`f x₁ = f x₂`という事実が与えられたら、`x₁ = x₂`という事実を返す写像」と思える。
 なので、例えば`hfx : f x₁ = f x₂`があれば、
-`hfinj`という関数にそれを代入した`hfinj hfx`は、`x₁ = x₂`という事実になる。
+`hfinj`という写像にそれを代入した`hfinj hfx`は、`x₁ = x₂`という事実になる。
 
 *上級者向け（最初は読み飛ばしてください）*
 「`Injective`の定義を見ると`x₁`と`x₂`も与えなきゃ駄目なんじゃ？」と思った方へ。
@@ -59,7 +59,8 @@ https://aconite-ac.github.io/theorem_proving_in_lean4_ja/dependent_type_theory.h
 -/
 
 -- 別解。実は`have`を使わず`apply`のみで上の証明は書ける。
-example {f : X → Y} {g : Y → Z} (hfinj : Injective f) (hginj : Injective g) : Injective (g ∘ f) := by
+example {f : X → Y} {g : Y → Z} (hfinj : Injective f) (hginj : Injective g) :
+    Injective (g ∘ f) := by
   rw [Injective]
   intro x₁ x₂ hgf
   apply hfinj -- なぜ`apply`でこう書き換わるか考えよう

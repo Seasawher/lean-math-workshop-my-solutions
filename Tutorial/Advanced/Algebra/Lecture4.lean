@@ -59,6 +59,7 @@ infixl:35 " ⧸ " => leftQuotient
 variable [Group G] {H : Subgroup G}
 
 /-- `G`から`G ⧸ H`への自然な全射。 -/
+@[reducible]
 def mk (a : G) : G ⧸ H :=
   Quotient.mk'' a
 
@@ -106,7 +107,7 @@ theorem lift_mk (f : G → Y) (h) (a : G) : (lift f h) (a ⋆ H) = f a := rfl
 instance : GroupAction G (G ⧸ H) where
   /-`a : G`が与えられたときに、写像`a • (-) : G ⧸ H → G ⧸ H`
   を対応させたい。
-  このため、`lift`に、関数`G → G ⧸ H, x ↦ (a * x) ⋆ H`と、
+  このため、`lift`に、写像`G → G ⧸ H, x ↦ (a * x) ⋆ H`と、
   それが`G ⧸ H`上でwell-definedなことの証明を与える。
   -/
   smul := fun a ↦ lift (fun x ↦ (a * x) ⋆ H) <| by
@@ -232,6 +233,8 @@ def leftQuotientStabilizerIsoSelfOfIsTransitive
     intro h
     simp [mul_smul, ← h]
   surjective := by -- 全射性
+    -- 証明は普通にやってもちょっと複雑なので、一度紙等に通常の証明を書いて考えてみるとよいかもしれない。
+
     -- 今`X`は推移的という仮定があるので、`x y : X`に対して、
     -- `∃ a : G, a • x = y`という形の主張は、
     -- `apply IsTransitive.exists_smul_eq`で示すことができる。

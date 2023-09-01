@@ -37,7 +37,7 @@ end Category
 
 /-- 空集合は集合の圏における始対象である。 -/ 
 -- 正確には、「空型は型の圏における始対象である。」
--- Leanにおける型と通常の数学書における集合はほとんど同じ意味です。
+-- Leanにおける型と一般的な数学書における集合はほとんど同じ意味です。
 example : Initial Empty where
   fromInitial X := by
     intro x
@@ -51,8 +51,8 @@ example : Initial Empty where
     aesop 
     
 /-- 整数環`ℤ`は可換環の圏における始対象である。 -/
-/- 環とは底集合と環構造の組であった。底集合`ℤ`に対して、`inferInstance`がmathlibのどこかで定義されている
-適切な環構造を探してくれている。 -/
+/- 環とは底集合と環構造の組であった。底集合`ℤ`に対して、`inferInstance`がmathlibのどこかで定義されて
+いる適切な環構造を探してくれている。 -/
 example : Initial (⟨ℤ, inferInstance⟩ : CommRingCat) where
   fromInitial := fun R ↦ Int.castRingHom R
   uniq := RingHom.eq_intCast'
@@ -143,8 +143,7 @@ namespace Coproduct
 
 /- 2元集合は帰納型として定義される。帰納型は`inductive`コマンドで定義することができる。
 帰納型の詳細については https://aconite-ac.github.io/theorem_proving_in_lean4_ja/inductive_types.html
-を参照せよ。
- -/
+を参照せよ。-/
 
 /-- 2元集合 `{l, r}` -/
 inductive Shape : Type
@@ -329,8 +328,8 @@ inductive CoequalizerRel {X Y : Type} (f g : X → Y) : Y → Y → Prop
 
 /- （正確にはこれは「生成される二項関係」であるが、商をとったら同じになるので違いは気にしないでおく） -/
 
-/- Leanにおいて商集合は`Quot`型で表される。二項関係`r : X → X → Prop`が与えられたとき、`Quot r`は`r`で
-生成される同値関係で`X`を割った集合を表す。 -/
+/- Leanにおいて商集合は`Quot`型で表される。二項関係`r : X → X → Prop`が与えられたとき、`Quot r`は
+`r`で生成される同値関係で`X`を割った集合を表す。 -/
 
 /- 商集合を作るときに使う -/
 #check Quot

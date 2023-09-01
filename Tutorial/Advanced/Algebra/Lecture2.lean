@@ -1,5 +1,5 @@
 /-
-このファイルでは群準同型と性質や、群準同型の核や像等を扱う。
+このファイルでは群準同型の性質や、群準同型の核や像等を扱う。
 一つの目標は「準同型が単射なことと核が自明なことは同値」である。
 *Lecture1で示したことは自由に使える*ので、必要なら使える定理を探しに行こう。
 
@@ -28,8 +28,9 @@ infixr:25 " →* " => GroupHom
 -- 以下この節では`G₁`と`G₂`を群、`f`をその間の準同型とする。
 variable [Group G₁] [Group G₂] {f : G₁ →* G₂}
 
--- `f`と`a : G₁`に対して`f a`などと書くためのおまじない
--- （`f`そのものは、関数と「積を保つという事実」を束ねたもので本来は関数でない）
+-- `f`と`a : G₁`に対して、いちいち`f.toFun a`と書く代わりに、`f a`と書くためのおまじない
+-- （`f`そのものは、写像`f.toFun`と、それが積を保つという事実`f.map_mul'`を束ねたもので、本来は写像でない）
+-- 右側のInfoviewには、`f a`の代わりに`↑f a`と表示されることもあるが、同じなので気にしないでください。
 instance : FunLike (G₁ →* G₂) G₁ (fun _ ↦ G₂) where
   coe := fun f ↦ f.toFun
   coe_injective' f₁ f₂ _ := by cases f₁; cases f₂; congr
@@ -38,6 +39,7 @@ instance : FunLike (G₁ →* G₂) G₁ (fun _ ↦ G₂) where
 @[simp]
 theorem map_mul {a b : G₁} : f (a * b) = f a * f b := f.map_mul' a b
 
+#check mul_left_cancel -- これが使えるかも
 /-- 群準同型は単位元を保つ。 -/
 @[simp]
 theorem map_one : f 1 = 1 := by
@@ -139,7 +141,7 @@ def ker (f : G₁ →* G₂) : Subgroup G₁ where
 
 /-- 核に入ることと飛ばして`1`に行くことは同値。 -/
 @[simp]
-theorem mem_ker {f : G₁ →* G₂} {a : G₁} : a ∈ f.ker ↔ f a = 1 := Iff.rfl 
+theorem mem_ker {f : G₁ →* G₂} {a : G₁} : a ∈ f.ker ↔ f a = 1 := Iff.rfl
 
 /-- 像に入ることの定義の確認。 -/
 @[simp]
@@ -210,7 +212,7 @@ theorem injective_iff_map_eq_one : Function.Injective f ↔ (∀ a, f a = 1 → 
       f (a * x⁻¹) = f a * f x⁻¹ := by simp
       _ = f a * (f x)⁻¹ := by simp
       _ = 1 := by simp [h]
-    
+
 namespace GroupHom
 
 #check mem_bot
@@ -278,7 +280,7 @@ open Equiv
 -/
 instance (X : Type) : Group (Perm X) where
   mul f g := Equiv.trans g f
-  -- この積`f * g`は、先に`g`、次に`f`という、関数の合成の向き。
+  -- この積`f * g`は、先に`g`、次に`f`という、写像の合成の向き。
   one := Equiv.refl X
   inv := Equiv.symm
   mul_assoc _ _ _ := rfl
@@ -300,7 +302,7 @@ def homToPerm : G →* Perm G where
     -- `G → G, x ↦ a * x`に対応する`Perm G`の元を構成する
     toFun := fun x ↦ a * x
     -- この写像の逆写像は何であろうか。
-    invFun := fun x ↦ a⁻¹ * x  
+    invFun := fun x ↦ a⁻¹ * x
     -- これらが互いに逆写像なことを示していく。
     left_inv := by
       rw [Function.LeftInverse]

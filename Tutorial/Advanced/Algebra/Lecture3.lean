@@ -24,7 +24,7 @@ section Section1
 
 左`G`集合は次のように定式化できる。
 Leanでは`G × X → X`という形よりも、`G → X → X`によって、
-「`G`の元が与えられたら「`X`から`X`への写像」を返す関数」で
+「`G`の元が与えられたら「`X`から`X`への写像」を返す写像」で
 作用写像を表すことに注意。
 -/
 class GroupAction (G : Type) [Group G] (X : Type) where
@@ -78,14 +78,14 @@ theorem GroupAction.surjective (a : G) : Function.Surjective fun (x : X) ↦ a �
   rw [Function.Surjective]
   intro x
   exists a⁻¹ • x
-  simp  
+  simp
 
 -- もっと強く、`a • (-)`という写像は自然な逆写像を持つ`X`から`X`への全単射である。
 -- `X`から`X`への全単射とその逆写像の組の集合は`X ≃ X`と表す。
 def GroupAction.toPerm : G → (X ≃ X) := fun (a : G) ↦ {
   toFun := fun x ↦ a • x
   -- この写像の逆写像は何であろうか？
-  invFun := fun x ↦ a⁻¹ • x  
+  invFun := fun x ↦ a⁻¹ • x
   -- これらが互いに逆写像なことを示す必要がある。
   left_inv := by
     rw [Function.LeftInverse]
@@ -140,7 +140,7 @@ instance : FunLike (GroupActionHom G X Y) X (fun _ ↦ Y) where
 /-- underlying functionが`f`の同変写像を単なる写像とみなしたものは`f`と等しい。 -/
 -- 当たり前の事実だがsimpで使えるようにしておくと便利なのでそうしておく。
 @[simp]
-theorem GroupActionHom.coe_coe (f : X → Y) (h) : ((⟨f, h⟩ : X →[G] Y) : X → Y) = f := 
+theorem GroupActionHom.coe_coe (f : X → Y) (h) : ((⟨f, h⟩ : X →[G] Y) : X → Y) = f :=
   rfl
 
 -- 定義からすぐ分かること
@@ -161,7 +161,8 @@ def GroupActionHom.comp (f₁ : X →[G] Y) (f₂ : Y →[G] Z) : X →[G] Z whe
 
 /-- `G`集合`X`と`Y`の間の`G`集合としての同型、
 つまり単射かつ全射な同変写像。 -/
-structure GroupActionIso (G) [Group G] (X) [GroupAction G X] (Y) [GroupAction G Y] extends X →[G] Y where
+structure GroupActionIso (G X Y) [Group G] [GroupAction G X] [GroupAction G Y]
+    extends X →[G] Y where
   injective : toFun.Injective
   surjective : toFun.Surjective
 
@@ -204,7 +205,7 @@ def yoneda : (G →[G] X) ≃ X where
   invFun := fun x ↦ {
     toFun := fun a ↦ a • x
     map_smul' := by -- `G`同変なことを示す必要がある。
-      -- 行先の写像を φ とする．これが同変写像であることを示す 
+      -- 行先の写像を φ とする．これが同変写像であることを示す
       set φ : G → X := fun a ↦ a • x
 
       intro b y

@@ -33,13 +33,13 @@ class Group (G : Type) where
 /-
 1. `G : Type`は`G`が集合であることを表すと思ってよい。
 2. `mul : G → G → G`は二項演算（mul = multiplication）。
-Leanで`→`は右結合的、つまり`mul : G → (G → G)`、つまり`mul`とは「`G`の元を与えたら「`G`から`G`への関数」を返すような関数」である。
+Leanで`→`は右結合的、つまり`mul : G → (G → G)`、つまり`mul`とは「`G`の元を与えたら「`G`から`G`への写像」を返すような写像」である。
 人によっては`Hom(G, Hom(G, G))`と書くと分かりやすいかもしれない。
 よって`mul`は二項演算と思える（`a`と`b`の結果は`mul a b`）。
 このようにLeanでは`X × Y → Z`の代わりに`X → Y → Z`を使うことが多い。
 3. `one : G`とは`G`の単位元のこと。
 `G`の元を表すときは `∈`でなく `a : G`のように表すことに注意。
-4. `inv : G → G`は`a`に対してその逆元（となるべきもの）を返す関数
+4. `inv : G → G`は`a`に対してその逆元（となるべきもの）を返す写像
 
 ここまでが構造であって、普通の数学ではその後は公理であるが、Leanでは公理（が成り立つという事実）も一緒に群という一つの構造だと思う。
 5. `mul_assoc`, `one_mul`, `mul_inv_left`が何を表すかはみれば分かるだろう。
@@ -57,7 +57,8 @@ example : Group ℤ where
   one := 0
   inv := fun x ↦ - x
   mul_assoc := by
-    exact fun a b c ↦ Int.add_assoc a b c -- ヒント: `apply?`で必要なものを見つけよう
+    -- ヒント: `apply?`で必要なものを見つけよう
+    exact fun a b c ↦ Int.add_assoc a b c
   one_mul := by
     exact fun a ↦ Int.zero_add a
   mul_inv_left := by
@@ -81,7 +82,7 @@ example : Group Aˣ where
 variable [Group G]
 /-
 いちいち`G`の演算を`mul a b`等と書いていたのでは大変なので、
-`*`と`1`と`⁻¹` (`\inv` または `\-` または `\-1`) が使えるようにする。
+`*`と`1`と`⁻¹` (`\inv` または `\-` または `\-1`) が使えるようにするためのおまじない。
 -/
 instance : Mul G := ⟨Group.mul⟩
 instance : One G := ⟨Group.one⟩
@@ -187,13 +188,14 @@ theorem inv_eq_of_mul_eq_one_left {a x : G} : x * a = 1 → a⁻¹ = x := by
   simp [h]
 
 -- その変種。後で便利かも。
-theorem eq_inv_of_mul_eq_one_left {a x : G} : x * a = 1 → x = a⁻¹ := fun h ↦ (inv_eq_of_mul_eq_one_left h).symm
+theorem eq_inv_of_mul_eq_one_left {a x : G} : x * a = 1 → x = a⁻¹ :=
+  fun h ↦ (inv_eq_of_mul_eq_one_left h).symm
 
 @[simp]
 theorem inv_one : (1 : G)⁻¹ = 1 := by
   apply inv_eq_of_mul_eq_one_left
   simp
-  
+
 @[simp]
 theorem inv_inv {a : G} : a⁻¹⁻¹ = a := by
   apply mul_left_cancel a⁻¹
@@ -259,7 +261,7 @@ structure Subgroup (G) [Group G] where
 
 *上級者向け、飛ばしてください*
 集合`X`について`Set X`とは実は`X → Prop`のことで、
-`A : Set X`とは「`X`の元が与えられたら、それが`A`に属するかどうかの命題を返す関数`A : G → Prop`のこと」
+`A : Set X`とは「`X`の元が与えられたら、それが`A`に属するかどうかという命題を返す写像`A : G → Prop`のこと」
 ようするに`{x : X | xについての条件 }`という部分集合の作り方の、
 `xについての条件`のところを取り出したのが`A`である。
 `x : X`がこの条件`A`を満たす、つまり`A x`のことを、
@@ -298,7 +300,7 @@ theorem inv_mem_iff {a : G} : a⁻¹ ∈ H ↔ a ∈ H := by
   constructor
   · intro h
     rw [←ha]
-    exact inv_mem h    
+    exact inv_mem h
   · intro h
     exact inv_mem h
 
@@ -331,9 +333,9 @@ def center (G) [Group G] : Subgroup G where
     have hbx := hb x
 
     rw [
-      mul_assoc, 
-      hbx, 
-      ←mul_assoc, 
+      mul_assoc,
+      hbx,
+      ←mul_assoc,
       hax,
       mul_assoc
     ]
@@ -348,8 +350,8 @@ def center (G) [Group G] : Subgroup G where
     simp [ha]
 
 /-
-下の`centrizer`と`noramlizer`は少し面倒で難しいかもしれない。
-以降では使わないので*最初は飛ばす*のをおすすめ。
+下の`centrizer`と`noramlizer`は少し面倒で難しい。
+以降では使わないので*最初は飛ばして*、時間が余ったら解いてみることをおすすめします。
 -/
 variable (H)
 /-- 部分群`H`の中心化群。 -/
@@ -368,7 +370,7 @@ def Subgroup.centralizer : Subgroup G where
     have ha := ha x hx
     have hb := hb x hx
     rw [
-      mul_assoc, 
+      mul_assoc,
       hb,
       ←mul_assoc,
       ha,
