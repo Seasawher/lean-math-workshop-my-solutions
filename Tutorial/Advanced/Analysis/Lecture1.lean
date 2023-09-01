@@ -123,6 +123,12 @@ theorem isBigO_const_mul_self (c : ℝ) (f : ℝ → ℝ) :
     (fun x ↦ c * f x) =O[𝓝 a] f :=
   Asymptotics.isBigO_const_mul_self c f (𝓝 a)
 
+/--
+1. `f(x) = o(g(x))` as `x → b`
+2. `h` は `a` で連続で，`h(a) = b`
+---------------------------------
+⊢  `f ∘ h (x) = o( g ∘ h (x))` as `x → a`  
+ -/
 theorem IsLittleO.comp_tendsto (hfg : f =o[𝓝 b] g) (hh : Tendsto h (𝓝 a) (𝓝 b)) : 
     (f ∘ h) =o[𝓝 a] (g ∘ h) :=
   Asymptotics.IsLittleO.comp_tendsto hfg hh
@@ -232,15 +238,28 @@ theorem HasDerivAt.comp (hf : HasDerivAt f f' a) (hg : HasDerivAt g g' (f a)) :
   apply h₁.triangle h₂
   case eq1 =>
     -- `IsLittleO.comp_tendsto`が使える
-    sorry
-  case eq2 => 
-    sorry
+
+    -- `f` は微分可能なので連続
+    have hc :Tendsto f (𝓝 a) (𝓝 (f a)) := by exact continuousAt hf 
+    
+    -- `g ∘ f(x) - g ∘ f(a) - (f(x) - f(a)) g'(a) = o( f(x) - f(a) )` as `x → a` を示したい
+    -- `IsLittleO.comp_tendsto` を使う
+    -- `f` は `g x - g (f a) - (x - f a) g'`
+    -- `g` は `fun x ↦ x - f a`
+    -- `h` は `fun x ↦ f x`
+    -- として適用する
+    apply IsLittleO.comp_tendsto hg hc
+  case eq2 =>
+    -- `f(x) - f(a) = o(x - a)` as `x → a` を示したい
+    exact isBigO_sub hf
   case eq3 =>
-    sorry
+    -- 関数の等式を示したいので，元をとる
+    funext x
+    ring
   case eq4 =>
-    sorry
+    exact isBigO_const_mul_self g' fun x ↦ f x - f a - (x - a) * f'
   case eq5 =>
-    sorry
+    exact hf
 
 -- 次の問題で使うかも？
 #check IsLittleO.const_mul_left
