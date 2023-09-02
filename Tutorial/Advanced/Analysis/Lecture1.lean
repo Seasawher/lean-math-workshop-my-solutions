@@ -311,13 +311,35 @@ theorem hasDerivAt_pow (n : ℕ) (a : ℝ) :
   | zero => 
     -- n = 0 のケース
     simp [HasDerivAt]
-  | succ n ih =>
+  | succ k ih =>
     -- n = k + 1 のケース
-    have h1 : (fun x ↦ x ^ (Nat.succ n + 1)) = fun x ↦ x * x ^ (n + 1) := by
+    rw [Nat.succ_eq_add_one]
+    
+    -- `HasDerivAt.mul`が使える
+    set f : ℝ → ℝ := fun x ↦ x ^ (k + 1)
+    set g : ℝ → ℝ := fun x ↦ x
+    have hg : HasDerivAt g 1 a := hasDerivAt_id a
+    have hp := HasDerivAt.mul ih hg
+    
+    have h1 : (fun x : ℝ ↦ f x * g x) = fun x : ℝ ↦ x ^ (k + 1 + 1) := by
       funext x
-      rw [Nat.succ_eq_add_one, Nat.pow_succ]
-      ring_nf
-    sorry
+      ring
+  
+    have h2 : (↑k + 1) * a ^ k * g a + f a * 1 = (↑(k + 1) + 1) * a ^ (k + 1) := by
+      calc (↑k + 1) * a ^ k * g a + f a * 1 
+        _ = (↑k + 1) * a ^ k * a + a ^ (k + 1) := by simp
+        _ = (↑k + 1 + 1) * a ^ (k + 1)         := by ring
+        _ = (↑(k + 1) + 1) * a ^ (k + 1)       := by simp
+
+    conv at hp =>
+      congr
+      · -- 微分される関数
+        rw [h1]
+      · -- 微分係数
+        rw [h2]
+      · -- 値
+        rfl
+    assumption
 /- 
 TIPS: 右画面の表示に現れる`↑n`はcoercionといって、ここでは自然数を実数と思いたいときに現れる。
 つまり、`n : ℕ`に対して`↑n : ℝ`となる。
