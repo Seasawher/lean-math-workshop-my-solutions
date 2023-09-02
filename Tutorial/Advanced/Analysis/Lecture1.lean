@@ -307,10 +307,16 @@ theorem HasDerivAt.mul {f : ℝ → ℝ} (hf : HasDerivAt f f' a) (hg : HasDeriv
 theorem hasDerivAt_pow (n : ℕ) (a : ℝ) : 
     HasDerivAt (fun x ↦ x ^ (n + 1)) ((n + 1) * a ^ n) a := by
   -- ヒント: `induction n`で帰納法が使える。`induction`の使い方は`cases`と大体同じ。
-  induction n
-  · -- n = 0 のケース
+  induction n with
+  | zero => 
+    -- n = 0 のケース
     simp [HasDerivAt]
-  · -- n = k + 1 のケース
+  | succ n ih =>
+    -- n = k + 1 のケース
+    have h1 : (fun x ↦ x ^ (Nat.succ n + 1)) = fun x ↦ x * x ^ (n + 1) := by
+      funext x
+      rw [Nat.succ_eq_add_one, Nat.pow_succ]
+      ring_nf
     sorry
 /- 
 TIPS: 右画面の表示に現れる`↑n`はcoercionといって、ここでは自然数を実数と思いたいときに現れる。
@@ -320,7 +326,7 @@ TIPS: 右画面の表示に現れる`↑n`はcoercionといって、ここでは
 -- 再び`x ↦ x ^ 2`の微分。すぐ上で示した`hasDerivAt_pow`を使ってみよう。
 example (a : ℝ) : HasDerivAt (fun x ↦ x ^ 2) (2 * a) a := by
   suffices HasDerivAt (fun x ↦ x ^ 2) (((1 : ℕ) + 1) * a ^ 1) a by simpa [one_add_one_eq_two]
-  sorry
+  exact hasDerivAt_pow 1 a
 
 /- # Leanでの部分関数の扱いについて
 少し発展的な話題となります。読み飛ばしても問題ありません。
