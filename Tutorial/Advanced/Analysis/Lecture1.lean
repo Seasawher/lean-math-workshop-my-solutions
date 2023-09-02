@@ -273,25 +273,32 @@ theorem HasDerivAt.mul {f : ℝ → ℝ} (hf : HasDerivAt f f' a) (hg : HasDeriv
           (f a * (g x - g a - (x - a) * g') + (f x - f a) * (g x - g a)) := ?eq1
     _ =o[𝓝 a] fun x ↦ x - a                                             := ?eq2
   case eq1 =>
-    sorry
+    funext x
+    ring
   case eq2 =>
-    have hf' : (fun x ↦ g a * (f x - f a - (x - a) * f')) =o[𝓝 a] fun x ↦ x - a := 
-      sorry
-    have hg' : (fun x ↦ f a * (g x - g a - (x - a) * g')) =o[𝓝 a] fun x ↦ x - a := 
-      sorry
+    have hf' : (fun x ↦ g a * (f x - f a - (x - a) * f')) =o[𝓝 a] fun x ↦ x - a := by
+      apply IsLittleO.const_mul_left
+      exact hf
+    have hg' : (fun x ↦ f a * (g x - g a - (x - a) * g')) =o[𝓝 a] fun x ↦ x - a := by
+      apply IsLittleO.const_mul_left
+      exact hg
     have hfg := 
       calc (fun x ↦ (f x - f a) * (g x - g a))
         _ =o[𝓝 a] fun x ↦ (x - a) * 1      := ?eq3
         _ = fun x ↦ x - a                   := ?eq4
-    sorry
+    apply IsLittleO.add
+    · exact hf'
+    · apply IsLittleO.add hg' hfg
     case eq3 =>
       have hg'' : (fun x ↦ g x - g a) =o[𝓝 a] fun _ ↦ (1 : ℝ) := by
         rw [Asymptotics.isLittleO_one_iff, tendsto_sub_nhds_zero_iff]
-        sorry
+        exact continuousAt hg
       -- `IsBigO.mul_isLittleO`が使える
-      sorry
+      apply IsBigO.mul_isLittleO
+      exact isBigO_sub hf
+      exact hg''
     case eq4 =>
-      sorry
+      simp
   
 -- 次の問題で使うかも？
 #check Nat.succ_eq_add_one
@@ -300,8 +307,11 @@ theorem HasDerivAt.mul {f : ℝ → ℝ} (hf : HasDerivAt f f' a) (hg : HasDeriv
 theorem hasDerivAt_pow (n : ℕ) (a : ℝ) : 
     HasDerivAt (fun x ↦ x ^ (n + 1)) ((n + 1) * a ^ n) a := by
   -- ヒント: `induction n`で帰納法が使える。`induction`の使い方は`cases`と大体同じ。
-  sorry
-
+  induction n
+  · -- n = 0 のケース
+    simp [HasDerivAt]
+  · -- n = k + 1 のケース
+    sorry
 /- 
 TIPS: 右画面の表示に現れる`↑n`はcoercionといって、ここでは自然数を実数と思いたいときに現れる。
 つまり、`n : ℕ`に対して`↑n : ℝ`となる。
