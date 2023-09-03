@@ -46,6 +46,8 @@ theorem IsLocalMax.hasDerivAt_eq_zero (h : IsLocalMax f a) (hf : HasDerivAt f f'
     f' = 0 := by
   -- `f' ≤ 0`と`0 ≤ f'`を示す。
   apply le_antisymm ?right ?left
+
+  -- `f' ≤ 0`を示す
   case right =>
     -- `x`を`a`に右側から近づけたとき`(f x - f a) / (x - a)`は`f`に収束する。
     have hf : Tendsto (fun x ↦ (f x - f a) / (x - a)) (𝓝[>] a) (𝓝 f') := by
@@ -64,9 +66,31 @@ theorem IsLocalMax.hasDerivAt_eq_zero (h : IsLocalMax f a) (hf : HasDerivAt f f'
     -- 仮定`ha, h`を使って不等式を解く。
     · linarith only [h]
     · linarith only [ha]
+
+  -- `0 ≤ f'`を示す
   case left =>
     -- 右側の場合を真似て証明してみよう。最後は`div_nonneg_of_nonpos`を使うとよい。
-    sorry
+    
+    -- `x`を`a`に左側から近づけたとき`(f x - f a) / (x - a)`は`f`に収束する
+    have hf : Tendsto (fun x ↦ (f x - f a) / (x - a)) (𝓝[<] a) (𝓝 f') := by
+      rw [hasDerivAt_iff_tendsto_slope] at hf
+      apply hf.mono_left (nhds_left'_le_nhds_ne a)
+    
+    -- `(f x - f a) / (x - a)`が`a`の左側近傍で`0`以上であることを示せばよい
+    suffices ∀ᶠ x in 𝓝[<] a, (f x - f a) / (x - a) ≥ 0 from ge_of_tendsto hf this
+
+    -- `a`の左側近傍では`x < a`である
+    have ha : ∀ᶠ x in 𝓝[<] a, x < a := eventually_nhdsWithin_of_forall fun x hx ↦ hx
+
+    -- `a`は極大値なので`f x ≤ f a`である
+    have h : ∀ᶠ x in 𝓝[<] a, f x ≤ f a := h.filter_mono nhdsWithin_le_nhds
+
+    -- 近傍での性質`h₁, ⋯, hₙ`を使って近傍での性質を示したいときは`filter_upwards [h₁, ⋯, hₙ]`を使う。
+    filter_upwards [ha, h]
+    intro x ha h
+    apply div_nonneg_of_nonpos
+    · linarith only [h]
+    · linarith only [ha]
 
 /-- 極小値を取る点での微分係数はゼロ -/
 theorem IsLocalMin.hasDerivAt_eq_zero (h : IsLocalMin f a) (hf : HasDerivAt f f' a) : f' = 0 := by
