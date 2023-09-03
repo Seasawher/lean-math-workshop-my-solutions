@@ -201,8 +201,11 @@ theorem exists_ratio_hasDerivAt_eq_ratio_slope (hab : a < b)
       (hgc : ContinuousOn g (Icc a b)) (hgg' : ∀ x ∈ Ioo a b, HasDerivAt g (g' x) x) :
         ∃ c ∈ Ioo a b, (g b - g a) * f' c = (f b - f a) * g' c := by
   let h x := (g b - g a) * f x - (f b - f a) * g x
+  
+  -- `h` は閉区間 `[a, b]` 上で連続
   have hhc : ContinuousOn h (Icc a b) :=
     (continuousOn_const.mul hfc).sub (continuousOn_const.mul hgc)
+  
   sorry
 
 -- 次の問題で使うかも？
