@@ -184,7 +184,16 @@ variable {f f' : ℝ → ℝ} {g g' : ℝ → ℝ} {a b : ℝ}
 /-- Rolleの定理 -/
 theorem exists_hasDerivAt_eq_zero (hab : a < b) (hfc : ContinuousOn f (Icc a b)) (hfI : f a = f b)
     (hff' : ∀ x ∈ Ioo a b, HasDerivAt f (f' x) x) : ∃ c ∈ Ioo a b, f' c = 0 := by
-  sorry
+  
+  -- `f` は閉区間 `[a, b]` 上で極値をとる
+  have ⟨c, cmem, hc⟩ : ∃ c ∈ Ioo a b, IsLocalExtr f c := by
+    apply exists_local_extr_Ioo hab hfc hfI
+  
+  -- `f' c = 0` を示せばよい
+  suffices f' c = 0 by
+    exact ⟨c, cmem, this⟩
+  
+  exact IsLocalExtr.hasDerivAt_eq_zero hc (hff' c cmem)
   
 /-- Cauchyの平均値の定理 -/
 theorem exists_ratio_hasDerivAt_eq_ratio_slope (hab : a < b) 
