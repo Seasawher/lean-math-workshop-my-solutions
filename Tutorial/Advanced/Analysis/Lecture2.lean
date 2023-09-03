@@ -95,7 +95,28 @@ theorem IsLocalMax.hasDerivAt_eq_zero (h : IsLocalMax f a) (hf : HasDerivAt f f'
 /-- 極小値を取る点での微分係数はゼロ -/
 theorem IsLocalMin.hasDerivAt_eq_zero (h : IsLocalMin f a) (hf : HasDerivAt f f' a) : f' = 0 := by
   -- ヒント: `IsLocalMax.hasDerivAt_eq_zero`を`x ↦ - f x`に対して使おう。
-  sorry
+  
+  -- `f` を反転させた関数を定義
+  set g := fun x => - f x with hdg
+  
+  -- `g` は `a` で極大値を取る
+  have h' : IsLocalMax g a := by
+    rw [hdg, IsLocalMax]
+    rw [IsLocalMin] at h
+    filter_upwards [h]
+    simp  
+
+  -- `g` は `a` で微分可能で，微分係数 `- f'` を持つ
+  have hg' : HasDerivAt g (- f') a := by
+    rw [hdg]
+    exact hf.neg
+
+  -- `- f' = 0` を示せばよい
+  have : f' = 0 ↔ - f' = 0 := by simp 
+  rw [this]
+
+  -- `IsLocalMax.hasDerivAt_eq_zero` を適用する
+  apply IsLocalMax.hasDerivAt_eq_zero h' hg'
 
 -- 次の問題で使うかも？
 #check IsLocalExtr.elim
