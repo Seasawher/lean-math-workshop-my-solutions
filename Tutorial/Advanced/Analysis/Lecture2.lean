@@ -123,7 +123,12 @@ theorem IsLocalMin.hasDerivAt_eq_zero (h : IsLocalMin f a) (hf : HasDerivAt f f'
 
 /-- 極値を取る点での微分係数はゼロ -/
 theorem IsLocalExtr.hasDerivAt_eq_zero (h : IsLocalExtr f a) (hf : HasDerivAt f f' a) : f' = 0 := by
-  sorry
+  have h' : IsLocalMax f a ∨ IsLocalMin f a := by exact Iff.mp Or.comm h
+  cases h'
+  case inl hmax =>
+    exact IsLocalMax.hasDerivAt_eq_zero hmax hf
+  case inr hmin =>
+    exact IsLocalMin.hasDerivAt_eq_zero hmin hf
 
 /-
 次の定理はRolleの定理の証明に用いる。
@@ -137,15 +142,30 @@ theorem IsLocalExtr.hasDerivAt_eq_zero (h : IsLocalExtr f a) (hf : HasDerivAt f 
 /-- 閉区間上の連続関数は端点において同じ値を持つならば区間の内部で極値を取る。-/
 theorem exists_local_extr_Ioo (hab : a < b) (hfc : ContinuousOn f (Icc a b)) (hfI : f a = f b) :
     ∃ c ∈ Ioo a b, IsLocalExtr f c := by
+
+  -- 示すべきことの言い換え
   suffices ∃ c ∈ Ioo a b, IsExtrOn f (Icc a b) c by
     rcases this with ⟨c, cmem, hc⟩
     exists c, cmem
     apply hc.isLocalExtr <| Icc_mem_nhds cmem.1 cmem.2
+  
+  -- 開区間 `(a, b)` は空ではない
   have ne : (Icc a b).Nonempty := nonempty_Icc.2 (le_of_lt hab)
+  
+  -- 閉区間 `[a, b]` 上で `f` は最大値をとる
   have ⟨C, Cmem, Cge⟩ : ∃ C ∈ Icc a b, IsMaxOn f (Icc a b) C := by
-    sorry
+    apply IsCompact.exists_isMaxOn
+    exact isCompact_Icc
+    exact ne
+    exact hfc
+
+  -- 閉区間 `[a, b]` 上で `f` は最小値をとる
   have ⟨c, cmem, cle⟩ : ∃ c ∈ Icc a b, IsMinOn f (Icc a b) c := by
-    sorry
+    apply IsCompact.exists_isMinOn
+    exact isCompact_Icc
+    exact ne
+    exact hfc
+  
   change ∀ x ∈ Icc a b, f x ≤ f C at Cge
   change ∀ x ∈ Icc a b, f c ≤ f x at cle
   by_cases hc : f c = f a
