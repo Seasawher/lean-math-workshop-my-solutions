@@ -200,12 +200,25 @@ theorem exists_ratio_hasDerivAt_eq_ratio_slope (hab : a < b)
     (hfc : ContinuousOn f (Icc a b)) (hff' : ∀ x ∈ Ioo a b, HasDerivAt f (f' x) x)
       (hgc : ContinuousOn g (Icc a b)) (hgg' : ∀ x ∈ Ioo a b, HasDerivAt g (g' x) x) :
         ∃ c ∈ Ioo a b, (g b - g a) * f' c = (f b - f a) * g' c := by
+  -- 関数 `h` を定義する
   let h x := (g b - g a) * f x - (f b - f a) * g x
+
+  -- 関数 `h'` も定義する
+  let h' x := (g b - g a) * f' x - (f b - f a) * g' x
+
+  -- `h'` は `h` の導関数
+  have hdv : ∀ x ∈ Ioo a b, HasDerivAt h (h' x) x := by
+    intros x hx
+    dsimp
+    sorry
   
   -- `h` は閉区間 `[a, b]` 上で連続
   have hhc : ContinuousOn h (Icc a b) :=
     (continuousOn_const.mul hfc).sub (continuousOn_const.mul hgc)
   
+  -- `h` は端の値が等しい
+  have hfI : h a = h b := by simp ; ring
+
   sorry
 
 -- 次の問題で使うかも？
