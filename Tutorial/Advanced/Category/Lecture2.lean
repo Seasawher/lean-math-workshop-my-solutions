@@ -1,7 +1,6 @@
 import Tutorial.Advanced.Category.Lecture1
 import Mathlib.RingTheory.TensorProduct
 import Mathlib.Tactic.Widget.CommDiag
-import ProofWidgets.Component.GoalTypePanel
 
 namespace Tutorial 
 
@@ -66,11 +65,19 @@ example : Initial (⟨ℤ, inferInstance⟩ : CommRingCat) where
 
 universe u₁ v₁ u₂ v₂
 
-/-- 圏`C`から圏`D`への関手`F`は対象の間の写像`F.obj : C → D`と射の間の
-写像`F.map : Hom a b → Hom (F.obj a) (F.obj b)`の組であって、恒等射と合成を保つものである。 -/
+/--
+圏`C`から圏`D`への関手`F`は，以下の条件を満たすものである
+1. 対象の間の写像`F.obj : C → D`と
+2. 射の間の写像`F.map : Hom a b → Hom (F.obj a) (F.obj b)`の組であって,
+3. 恒等射と合成を保つ
+-/
 structure Functor (C : Type u₁) [Category.{u₁, v₁} C] (D : Type u₂) [Category.{u₂, v₂} D] where
+  /-- 対象の間の写像 -/
   obj : C → D
+
+  /-- 射の間の写像 -/
   map : ∀ {a b}, Hom a b → Hom (obj a) (obj b)
+  
   map_id : ∀ a, map (𝟙 a) = 𝟙 (obj a)
   map_comp : ∀ {a b c} (f : Hom a b) (g : Hom b c), map (f ≫ g) = (map f) ≫ (map g)
 
@@ -81,7 +88,17 @@ attribute [simp] Functor.map_id Functor.map_comp
 
 variable {J : Type u₁} [Category.{u₁, v₁} J] {C : Type u₂} [Category.{u₂, v₂} C]
 
-/-- 関手`F`上の余錐 -/
+/--
+関手 `F: J → C` 上の余錐とは，
+1. 頂点と呼ばれる `C` の対象 `c`
+1. 頂点への射の族 `( F j → c ), j ∈ J`
+の組であって，射の族 `( F j → c ), j ∈ J` が自然性の条件を満たすものである．
+
+つまり以下の図式は可換である
+` i     F i → c   `
+` ↓       ↓   ↓id `
+` j     F j → c   `
+-/
 structure Cocone (F : Functor J C) where
   /-- `C`の対象（頂点という） -/
   vertex : C
@@ -111,14 +128,15 @@ attribute [pp_dot] Functor.obj Functor.map Cocone.toVertex CoconeHom.hom
 instance : Category (Cocone F) where
   Hom s t := CoconeHom s t
   comp {r s t} (f : CoconeHom r s) (g : CoconeHom s t) := 
-    { hom := f.hom ≫ g.hom
+    { 
+      hom := f.hom ≫ g.hom
       comm := by
-        with_panel_widgets [ProofWidgets.GoalTypePanel]
           intro j
           calc r.toVertex j ≫ f.hom ≫ g.hom 
             _ = (r.toVertex j ≫ f.hom) ≫ g.hom := by aesop
             _ = s.toVertex j ≫ g.hom := by rw [f.comm j]
-            _ = t.toVertex j := by exact CoconeHom.comm g j }
+            _ = t.toVertex j := by exact CoconeHom.comm g j 
+    }
   id t := 
     { 
       hom := 𝟙 t.vertex
@@ -191,11 +209,11 @@ def sumCocone (F : Functor Coproduct.Shape Type) : Cocone F where
   vertex := F.obj .l ⊕ F.obj .r
   toVertex j := match j with
     -- 「標準的な写像」を使おう
-    | .l => by sorry
-    | .r => sorry
+    | .l => Sum.inl
+    | .r => Sum.inr
   naturality f := match f with
     | .id _ => by
-      sorry
+      aesop
     
 /- 集合の圏における余積はdisjoint union -/
 example (F : Functor Coproduct.Shape Type) : Colimit (sumCocone F) where
@@ -209,7 +227,8 @@ example (F : Functor Coproduct.Shape Type) : Colimit (sumCocone F) where
       -- `.l`か`.r`で場合分け
       rcases j with _ | _
       · sorry
-      · sorry }
+      · sorry 
+  }
   uniq := by 
     intro t f 
     apply CoconeHom.ext
