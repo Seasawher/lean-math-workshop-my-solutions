@@ -221,17 +221,30 @@ theorem exists_ratio_hasDerivAt_eq_ratio_slope (hab : a < b)
         intro x
         rw [hneg]
         rw [← mul_assoc]
-      -- apply HasDerivAt.const_mul
-      sorry
+      conv =>
+        arg 2
+        rw [hneg, ←mul_assoc]
+      apply HasDerivAt.const_mul
+      exact hgg' x hx
   
   -- `h` は閉区間 `[a, b]` 上で連続
-  have hhc : ContinuousOn h (Icc a b) :=
+  have hfI : ContinuousOn h (Icc a b) :=
     (continuousOn_const.mul hfc).sub (continuousOn_const.mul hgc)
   
   -- `h` は端の値が等しい
-  have hfI : h a = h b := by simp ; ring
+  have hcc : h a = h b := by simp ; ring
 
-  sorry
+  -- Rolle の定理が適用できる
+  -- Rolle の定理が存在を主張している実数を `c` とする
+  have ⟨ c, hrolle ⟩ := exists_hasDerivAt_eq_zero hab hfI hcc hdv
+
+  -- その `c` がまさに条件を満たすことを示す
+  exists c
+  constructor
+  · exact hrolle.left
+  · have hrolle := hrolle.right
+    dsimp at hrolle
+    linarith
 
 -- 次の問題で使うかも？
 #check eq_div_iff
