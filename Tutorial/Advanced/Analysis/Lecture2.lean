@@ -206,11 +206,23 @@ theorem exists_ratio_hasDerivAt_eq_ratio_slope (hab : a < b)
   -- 関数 `h'` も定義する
   let h' x := (g b - g a) * f' x - (f b - f a) * g' x
 
+  -- マイナス1を掛けることと，加法逆元をとることが同じ
+  have hneg : ∀ a : ℝ , - a = (-1) * a := by exact fun a ↦ neg_eq_neg_one_mul a
+
   -- `h'` は `h` の導関数
   have hdv : ∀ x ∈ Ioo a b, HasDerivAt h (h' x) x := by
     intros x hx
     dsimp
-    sorry
+    apply HasDerivAt.add
+    · apply HasDerivAt.const_mul
+      exact hff' x hx
+    · conv =>
+        arg 1
+        intro x
+        rw [hneg]
+        rw [← mul_assoc]
+      -- apply HasDerivAt.const_mul
+      sorry
   
   -- `h` は閉区間 `[a, b]` 上で連続
   have hhc : ContinuousOn h (Icc a b) :=
