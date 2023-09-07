@@ -41,6 +41,13 @@ theorem «0.9999999 = 1» : Real.ofCauchy (Quotient.mk CauSeq.equiv «0.9999999�
   intro ε ε0
   suffices ∃ i, ∀ (j : ℕ), j ≥ i → (10 ^ j : ℚ)⁻¹ < ε by simpa [abs]
   -- ヒント: `pow_unbounded_of_one_lt`と`inv_lt_of_inv_lt`を使って、欲しい`i`を手に入れよう
+  
+  -- 示すべき式を書き換える
+  conv =>
+    congr
+    intro i j hji
+    -- have ε⁻¹ < 10 ^ j → (10 ^ j)⁻¹ < ε := by sorry
+    rfl
   sorry
 
 open Filter Topology Set Classical
