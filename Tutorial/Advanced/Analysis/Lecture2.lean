@@ -264,7 +264,7 @@ theorem exists_hasDerivAt_eq_slope (hab : a < b)
 
   -- `g` は微分可能
   have hgg' : ∀ x ∈ Ioo a b, HasDerivAt g 1 x := by
-    intro x hx
+    intro x _
     apply hasDerivAt_id
   
   -- `g` は連続
