@@ -249,10 +249,40 @@ theorem exists_ratio_hasDerivAt_eq_ratio_slope (hab : a < b)
 -- 次の問題で使うかも？
 #check eq_div_iff
 
-/-- Lagrangeの平均値の定理 -/
+/-- 
+Lagrangeの平均値の定理
+1. [hfc] `f` は区間 `[a, b]` 上で連続
+2. [hff] `f` の導関数が `f'`
+---------------------------
+⊢ `f' c = (f b - f a) / (b - a)` なる `c` がある
+-/
 theorem exists_hasDerivAt_eq_slope (hab : a < b) 
     (hfc : ContinuousOn f (Icc a b)) (hff' : ∀ x ∈ Ioo a b, HasDerivAt f (f' x) x) : 
       ∃ c ∈ Ioo a b, f' c = (f b - f a) / (b - a) := by
-  sorry
+  -- 関数を定義する
+  set g : ℝ → ℝ := id with hg
+
+  -- `g` は微分可能
+  have hgg' : ∀ x ∈ Ioo a b, HasDerivAt g 1 x := by
+    intro x hx
+    apply hasDerivAt_id
+  
+  -- `g` は連続
+  have hgc : ContinuousOn g (Icc a b) := by
+    rw [hg]
+    exact continuousOn_id
+
+  -- Cauchy の平均値の定理を, `g = fun x ↦ x` として適用する
+  have ⟨ c, hcauchy ⟩ := exists_ratio_hasDerivAt_eq_ratio_slope hab hfc hff' hgc hgg'
+  
+  exists c
+  constructor
+  · exact hcauchy.left
+  · rw [eq_div_iff]
+    simp at hcauchy
+    rw [← hcauchy.right]
+    exact mul_comm (f' c) (b - a)
+    refine Ne.symm (ne_of_lt ?right.h)
+    linarith
 
 end Tutorial
