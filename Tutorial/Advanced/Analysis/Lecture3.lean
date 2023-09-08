@@ -46,8 +46,28 @@ theorem «0.9999999 = 1» : Real.ofCauchy (Quotient.mk CauSeq.equiv «0.9999999�
   conv =>
     congr
     intro i j hji
-    -- have ε⁻¹ < 10 ^ j → (10 ^ j)⁻¹ < ε := by sorry
-    rfl
+    tactic =>
+      have h1: ε⁻¹ < 10 ^ j ↔ (10 ^ j: ℚ)⁻¹ < ε := by
+        constructor
+        · apply inv_lt_of_inv_lt
+          assumption
+        · apply inv_lt_of_inv_lt
+          apply pow_pos
+          linarith
+    rw [←h1]
+  
+  -- `ε⁻¹ < 10 ^ n` となる `n` が存在する
+  have ⟨ N, h2 ⟩ : ∃ n, ε⁻¹ < 10 ^ n := by
+    exact pow_unbounded_of_one_lt ε⁻¹ rfl
+  
+  exists N
+  intro j hj
+
+  -- `10 ^ N ≤ 10 ^ j` を示せば十分であることを言いたい
+  suffices 10 ^ N ≤ 10 ^ j by
+    -- この時点でなぜかゴールが `10 ^ N ≤ 10 ^ j` になる
+    sorry -- sorry の頭にカーソルを置くと，仮定が正しく追加されている
+
   sorry
 
 open Filter Topology Set Classical
