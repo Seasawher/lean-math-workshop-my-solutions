@@ -95,9 +95,11 @@ variable {J : Type u₁} [Category.{u₁, v₁} J] {C : Type u₂} [Category.{u�
 の組であって，射の族 `( F j → c ), j ∈ J` が自然性の条件を満たすものである．
 
 つまり以下の図式は可換である
-` i     F i → c   `
-` ↓       ↓   ↓id `
-` j     F j → c   `
+```
+ i       F i → c
+f↓     F f ↓   ↓id
+ j       F j → c 
+```
 -/
 structure Cocone (F : Functor J C) where
   /-- `C`の対象（頂点という） -/
@@ -116,7 +118,15 @@ variable {F : Functor J C}
 structure CoconeHom (s t : Cocone F) where
   /-- 頂点の間の射 -/
   hom : Hom s.vertex t.vertex
-  /-- `hom`と余錐の射は可換 -/
+  /--
+  `hom`と余錐の射は可換
+  ```
+  [J]       [C]
+  j      s j → s.vertex
+           ↓       ↓ hom
+         t j → t.vertex
+  ```
+  -/
   comm : ∀ j : J, s.toVertex j ≫ hom = t.toVertex j
 
 #print CoconeHom.comm
