@@ -64,11 +64,12 @@ theorem «0.9999999 = 1» : Real.ofCauchy (Quotient.mk CauSeq.equiv «0.9999999�
   intro j hj
 
   -- `10 ^ N ≤ 10 ^ j` を示せば十分であることを言いたい
-  suffices 10 ^ N ≤ 10 ^ j by
-    -- この時点でなぜかゴールが `10 ^ N ≤ 10 ^ j` になる
-    sorry -- sorry の頭にカーソルを置くと，仮定が正しく追加されている
-
-  sorry
+  suffices hp : (10 : ℚ) ^ N ≤ (10 : ℚ) ^ j from by
+    calc ε⁻¹ 
+      _ < 10 ^ N := h2
+      _ ≤ 10 ^ j := hp
+  
+  exact pow_le_pow rfl hj
 
 open Filter Topology Set Classical
 
