@@ -270,18 +270,32 @@ TIPS: 一元集合は`{i}`と表す。証明のどこかで用いるかもしれ
 /-- 閉区間`Icc 0 1`はコンパクト -/
 theorem HasFinSubCover_of_Icc (hU : ∀ (i : ι), IsOpen (U i)) (cover : Icc 0 1 ⊆ ⋃ (i : ι), U i) : 
     HasFinSubCover U (Icc 0 1) := by 
+  -- 背理法で示す
   by_contra H
   set c := (nestedIntervalCauSeq U).lim
   rcases cover (nestedIntervalLim_mem U 0) with ⟨_, ⟨i, rfl⟩, hU' : c ∈ U i⟩
   rcases Metric.isOpen_iff.mp (hU i) c hU' with ⟨ε, ε0, hε⟩
   have ⟨n, hn⟩ : ∃ n : ℕ, (ε / 2)⁻¹ < 2 ^ n := by
-    sorry
-  suffices HasFinSubCover U I(n) by 
-    sorry
-  suffices I(n) ⊆ U i by
-    sorry
-  suffices ∀ x, x ∈ I(n) → |x - c| < ε by
-    sorry
+    refine pow_unbounded_of_one_lt (ε / 2)⁻¹ ?hy1
+    linarith
+  
+  suffices HasFinSubCover U I(n) from by
+    have := nestedInterval_not_HasFinSubCover H n
+    contradiction
+
+  -- `I(n) ⊆ U i` を示せば十分
+  suffices I(n) ⊆ U i from by
+    dsimp [HasFinSubCover]
+    exists {i}
+    aesop
+  
+  suffices ∀ x, x ∈ I(n) → |x - c| < ε from by
+    dsimp [Icc]
+    intro x hx
+    apply hε
+    exact this x hx
+  
+  intro x hx
   sorry
 
 -- 空でない上に有界な実数集合が上限を持つことを用いた別証明
